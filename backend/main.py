@@ -89,8 +89,8 @@ async def upload_image(file: UploadFile = File(...)):
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
     
-    # Return the URL to access the file
-    return {"url": f"http://localhost:8000/uploads/{file.filename}"}
+    # Return relative URL, frontend will handle the domain
+    return {"url": f"/uploads/{file.filename}"}
 
 @app.post("/api/admin/content/setup_mock")
 def setup_mock_data(db: Session = Depends(get_db)):

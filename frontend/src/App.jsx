@@ -168,6 +168,10 @@ function Card({ img, index }) {
     { top: '50%', left: '-15px' }, { top: '50%', right: '-15px' }
   ];
 
+  // Xử lý link ảnh tĩnh từ backend
+  const baseUrl = API_URL.replace('/api', '');
+  const imageUrl = img.image_url.startsWith('/uploads/') ? baseUrl + img.image_url : img.image_url;
+
   return (
     <motion.div
       className="relative w-40 h-56 md:w-52 md:h-72 cursor-pointer [perspective:1000px] shrink-0"
@@ -198,7 +202,7 @@ function Card({ img, index }) {
       >
         {/* Front of card (The Image) */}
         <div className="absolute inset-0 [backface-visibility:hidden] rounded-xl overflow-hidden border-4 border-pink-400 shadow-[0_0_25px_rgba(236,72,153,0.8)] bg-white">
-          <img src={img.image_url} alt="Card" className="w-full h-full object-cover" />
+          <img src={imageUrl} alt="Card" className="w-full h-full object-cover" />
           
           {/* Trái tim quanh viền */}
           {hearts.map((pos, i) => (
