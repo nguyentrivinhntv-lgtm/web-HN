@@ -1,48 +1,28 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import axios from 'axios';
+import Tilt from 'react-parallax-tilt';
+import Typewriter from 'typewriter-effect';
+import ParticlesBackground from './ParticlesBackground';
+import MagicCursor from './MagicCursor';
 
 // Lấy URL API từ biến môi trường (dùng cho Vercel), nếu không có thì dùng localhost
 const API_URL = import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api';
 
-function GalaxyBackground() {
-  const stars = Array.from({ length: 100 }).map((_, i) => ({
-    id: i,
-    top: `${Math.random() * 100}%`,
-    left: `${Math.random() * 100}%`,
-    size: Math.random() * 3 + 1,
-    duration: Math.random() * 3 + 2,
-    delay: Math.random() * 2
-  }));
+const FAKE_FORTUNES = [
+  "Tương lai của bạn rất rạng rỡ... nhưng nhớ đóng tiền mạng tháng này nhé!",
+  "Bạn sẽ sớm gặp một người đặc biệt, nhưng họ mượn tiền bạn rồi lặn mất tăm.",
+  "Sự nghiệp của bạn sẽ thăng tiến như diều gặp gió, nhưng cẩn thận đứt dây.",
+  "Một món quà bất ngờ đang đến với bạn... đó là hóa đơn tiền điện tháng này.",
+  "Vũ trụ mách bảo rằng hôm nay bạn tuyệt đối không nên ăn mì tôm nữa."
+];
 
-  return (
-    <div className="fixed inset-0 z-0 bg-slate-950 overflow-hidden pointer-events-none">
-      {stars.map(star => (
-        <motion.div
-          key={star.id}
-          className="absolute bg-white rounded-full"
-          style={{
-            top: star.top,
-            left: star.left,
-            width: star.size,
-            height: star.size,
-          }}
-          animate={{
-            opacity: [0.1, 1, 0.1],
-            scale: [1, 1.5, 1],
-          }}
-          transition={{
-            duration: star.duration,
-            repeat: Infinity,
-            delay: star.delay,
-            ease: "easeInOut"
-          }}
-        />
-      ))}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-purple-900/20 via-slate-950/80 to-slate-950"></div>
-    </div>
-  );
-}
+// SFX Audio instances
+const clickSound = new Audio('https://assets.mixkit.co/active_storage/sfx/2571/2571-preview.mp3');
+const revealSound = new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3');
+const bgMusic = new Audio('https://assets.mixkit.co/active_storage/sfx/139/139-preview.mp3');
+bgMusic.loop = true;
+bgMusic.volume = 0.3;
 
 function AdminPanel({ onBack }) {
   const [images, setImages] = useState("");
@@ -174,12 +154,11 @@ function Card({ img, index }) {
 
   return (
     <motion.div
-      className="relative w-40 h-56 md:w-52 md:h-72 cursor-pointer [perspective:1000px] shrink-0"
+      className="relative w-40 h-56 md:w-52 md:h-72 shrink-0"
       style={{
-        // Sắp xếp so le (thụt lên thụt xuống)
         marginTop: index % 2 !== 0 ? '60px' : '0px',
-        marginLeft: index !== 0 ? '-20px' : '0px', // Hơi đè lên nhau một chút
-        zIndex: 50 - index // Càng về sau càng nằm dưới nếu đè nhau
+        marginLeft: index !== 0 ? '-20px' : '0px', 
+        zIndex: 50 - index 
       }}
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
@@ -190,86 +169,137 @@ function Card({ img, index }) {
       }}
       whileHover={{ scale: 1.1, zIndex: 100 }}
     >
-      {/* Container to handle the 3D continuous rotation */}
-      <motion.div
-        className="w-full h-full relative [transform-style:preserve-3d]"
-        animate={{ rotateY: 360 }}
-        transition={{ 
-          duration: 6, // Lật vòng tròn liên tục (6 giây 1 vòng)
-          repeat: Infinity,
-          ease: "linear",
-        }}
+      <Tilt
+        className="w-full h-full"
+        tiltMaxAngleX={20}
+        tiltMaxAngleY={20}
+        perspective={1000}
+        scale={1.05}
+        transitionSpeed={2000}
+        glareEnable={true}
+        glareMaxOpacity={0.6}
+        glareColor="#ffffff"
+        glarePosition="bottom"
       >
-        {/* Front of card (The Image) */}
-        <div className="absolute inset-0 [backface-visibility:hidden] rounded-xl overflow-hidden border-4 border-pink-400 shadow-[0_0_25px_rgba(236,72,153,0.8)] bg-white">
-          <img src={imageUrl} alt="Card" className="w-full h-full object-cover" />
-          
-          {/* Trái tim quanh viền */}
-          {hearts.map((pos, i) => (
-            <div key={i} className="absolute text-pink-500 text-lg drop-shadow-md animate-pulse" 
-                 style={{...pos, transform: pos.top === '50%' ? 'translateY(-50%)' : 'none'}}>
-              ❤️
-            </div>
-          ))}
-        </div>
-
-        {/* Back of card */}
-        <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-xl bg-gradient-to-br from-pink-600 to-purple-800 border-4 border-pink-400 flex items-center justify-center shadow-lg">
-          {/* Trái tim quanh viền mặt sau */}
-          {hearts.map((pos, i) => (
-            <div key={i} className="absolute text-pink-300 text-lg animate-pulse" 
-                 style={{...pos, transform: pos.top === '50%' ? 'translateY(-50%)' : 'none'}}>
-              ❤️
-            </div>
-          ))}
-          <div className="w-20 h-20 rounded-full border-4 border-pink-300/50 flex items-center justify-center bg-black/20">
-            <span className="text-pink-200 text-4xl">💖</span>
+        <motion.div
+          className="w-full h-full relative [transform-style:preserve-3d] cursor-pointer"
+          animate={{ rotateY: 360 }}
+          transition={{ 
+            duration: 6, 
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        >
+          {/* Front of card (The Image) */}
+          <div className="absolute inset-0 [backface-visibility:hidden] rounded-xl overflow-hidden border-4 border-pink-400 shadow-[0_0_25px_rgba(236,72,153,0.8)] bg-white">
+            <img src={imageUrl} alt="Card" className="w-full h-full object-cover" />
+            
+            {/* Trái tim quanh viền */}
+            {hearts.map((pos, i) => (
+              <div key={i} className="absolute text-pink-500 text-lg drop-shadow-md animate-pulse" 
+                   style={{...pos, transform: pos.top === '50%' ? 'translateY(-50%)' : 'none'}}>
+                ❤️
+              </div>
+            ))}
           </div>
-        </div>
-      </motion.div>
+
+          {/* Back of card */}
+          <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-xl bg-gradient-to-br from-pink-600 to-purple-800 border-4 border-pink-400 flex items-center justify-center shadow-lg">
+            {/* Trái tim quanh viền mặt sau */}
+            {hearts.map((pos, i) => (
+              <div key={i} className="absolute text-pink-300 text-lg animate-pulse" 
+                   style={{...pos, transform: pos.top === '50%' ? 'translateY(-50%)' : 'none'}}>
+                ❤️
+              </div>
+            ))}
+            <div className="w-20 h-20 rounded-full border-4 border-pink-300/50 flex items-center justify-center bg-black/20">
+              <span className="text-pink-200 text-4xl">💖</span>
+            </div>
+          </div>
+        </motion.div>
+      </Tilt>
     </motion.div>
   );
 }
 
 function App() {
-  const [hoverCount, setHoverCount] = useState(0);
-  const [inputText, setInputText] = useState("");
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [buttonPos, setButtonPos] = useState({ top: '50%', left: '50%' });
-  const [dbData, setDbData] = useState([]);
+  const [step, setStep] = useState('intro'); // intro -> interactive -> success
+  const [clickCount, setClickCount] = useState(0);
+  const [buttonPos, setButtonPos] = useState({ x: 0, y: 0 });
+  const [contents, setContents] = useState([]);
+  const [displayText, setDisplayText] = useState("");
   const [isAdminOpen, setIsAdminOpen] = useState(false);
+  const [glitch, setGlitch] = useState(false);
+  
+  // Custom Fortune for Typewriter
+  const [fortune, setFortune] = useState("");
+  const [hasStartedMusic, setHasStartedMusic] = useState(false);
+
+  const containerRef = useRef(null);
 
   useEffect(() => {
-    // Check if #admin is in URL
-    if(window.location.hash === '#admin') setIsAdminOpen(true);
-    
-    // Fetch data when component loads
-    const fetchData = async () => {
+    // Tải dữ liệu ban đầu
+    const fetchContent = async () => {
       try {
         const res = await axios.get(`${API_URL}/content`);
-        if(res.data.length > 0) setDbData(res.data);
-      } catch (e) {
-        console.error("Backend chưa chạy hoặc chưa có data");
+        if (res.data && res.data.length > 0) {
+          setContents(res.data);
+          setDisplayText(res.data[0].display_text);
+        } else {
+          // Fallback if no data
+          setDisplayText("Chưa có thông tin tương lai, vui lòng vào Admin để thêm dữ liệu!");
+        }
+      } catch (err) {
+        console.error("Error fetching content:", err);
       }
     };
-    fetchData();
-  }, [isAdminOpen]);
+    fetchContent();
+  }, []);
 
-  const handleMouseEnter = () => {
-    if (hoverCount < 4) {
-      const randomTop = Math.floor(Math.random() * 80) + 10;
-      const randomLeft = Math.floor(Math.random() * 80) + 10;
-      setButtonPos({ top: `${randomTop}%`, left: `${randomLeft}%` });
-      setHoverCount(prev => prev + 1);
-    } else {
-      setHoverCount(5);
+  const handleStartMusic = () => {
+    if (!hasStartedMusic) {
+      bgMusic.play().catch(e => console.log(e));
+      setHasStartedMusic(true);
     }
   };
 
-  const handleClick = () => {
-    if (hoverCount >= 4) {
-      setIsSuccess(true);
+  const handleInteractiveStart = () => {
+    handleStartMusic();
+    setStep('interactive');
+  };
+
+  const handleHoverButton = () => {
+    if (clickCount < 4) {
+      // Glitch effect before teleporting
+      clickSound.play().catch(e=>console.log(e));
+      setGlitch(true);
+      
+      setTimeout(() => {
+        setGlitch(false);
+        const container = containerRef.current;
+        if (!container) return;
+        const rect = container.getBoundingClientRect();
+        
+        // Randomize button position within container bounds
+        const maxX = rect.width - 150; // button width roughly 150
+        const maxY = rect.height - 60; // button height roughly 60
+        
+        const randomX = Math.random() * maxX - maxX/2;
+        const randomY = Math.random() * maxY - maxY/2;
+        
+        setButtonPos({ x: randomX, y: randomY });
+        setClickCount(prev => prev + 1);
+      }, 150); // Glitch duration
     }
+  };
+
+  const handleSuccessClick = () => {
+    revealSound.play().catch(e=>console.log(e));
+    setStep('success');
+    
+    // Pick a random fortune for the AI fake effect
+    const randomFortune = FAKE_FORTUNES[Math.floor(Math.random() * FAKE_FORTUNES.length)];
+    setFortune(randomFortune);
   };
 
   const fireworkParticles = Array.from({ length: 40 }).map((_, i) => ({
@@ -278,16 +308,16 @@ function App() {
     velocity: Math.random() * 100 + 50,
   }));
 
-  const textToDisplay = dbData.length > 0 ? dbData[0].display_text : "Tương lai của bạn sẽ vô cùng rực rỡ và lấp lánh! ✨";
-  const imagesToDisplay = dbData.length > 0 ? dbData : [
+  const imagesToDisplay = contents.length > 0 ? contents : [
     { image_url: "https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=300&q=80" },
     { image_url: "https://images.unsplash.com/photo-1534447677768-be436bb09401?auto=format&fit=crop&w=300&q=80" },
     { image_url: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=300&q=80" }
   ];
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
-      <GalaxyBackground />
+    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#0b0b1a]">
+      <MagicCursor />
+      <ParticlesBackground />
 
       {/* Nút vào Admin hiển thị rõ ràng */}
       <button 
@@ -302,64 +332,77 @@ function App() {
         {isAdminOpen ? (
           <motion.div
             key="admin"
-            initial={{ opacity: 0, y: 50 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="z-10 w-full flex justify-center px-4"
+            className="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm"
           >
-            <AdminPanel onBack={() => {
-              setIsAdminOpen(false);
-              window.location.hash = ''; // Clear hash
-            }} />
+            <div className="absolute inset-0" onClick={() => setIsAdminOpen(false)}></div>
+            <AdminPanel onBack={() => setIsAdminOpen(false)} />
           </motion.div>
-        ) : !isSuccess ? (
-          <motion.div 
-            key="input-screen"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
-            className="z-10 flex flex-col items-center justify-center w-full h-full absolute"
+        ) : step === 'intro' ? (
+          <motion.div
+            key="intro"
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.2, filter: "blur(10px)" }}
+            transition={{ duration: 0.8 }}
+            className="z-10 text-center flex flex-col items-center pointer-events-auto"
           >
-            <h1 className="text-4xl md:text-6xl font-bold mb-8 text-transparent bg-clip-text bg-gradient-to-r from-pink-300 via-purple-300 to-indigo-300 text-center px-4 drop-shadow-[0_0_10px_rgba(255,255,255,0.3)]">
-              Bạn muốn biết điều gì về tương lai?
+            <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 mb-8 drop-shadow-[0_0_15px_rgba(236,72,153,0.5)]">
+              Tiên Tri Tương Lai
             </h1>
-            
+            <p className="text-white/80 text-lg mb-12 max-w-md px-4">
+              Bạn đã sẵn sàng để khám phá những bí ẩn mà vũ trụ đã sắp đặt cho mình? Hãy nhập thông tin của bạn vào bên dưới.
+            </p>
             <input 
               type="text" 
-              value={inputText}
-              onChange={(e) => setInputText(e.target.value)}
-              placeholder="Nhập mong ước của bạn..."
-              className="w-80 md:w-96 px-6 py-4 rounded-full bg-slate-900/60 backdrop-blur-lg border-2 border-pink-500/50 text-white focus:outline-none focus:border-pink-400 transition-all shadow-[0_0_20px_rgba(236,72,153,0.4)] text-center text-xl placeholder-slate-400"
+              placeholder="Nhập tên hoặc thông tin của bạn..." 
+              className="px-6 py-4 rounded-full w-80 max-w-[90vw] text-slate-900 bg-white/90 backdrop-blur-md shadow-xl border-2 border-pink-400/50 focus:outline-none focus:border-pink-500 focus:ring-4 ring-pink-500/30 transition-all text-center font-medium mb-8"
+              autoFocus
             />
-
+            <button 
+              onClick={handleInteractiveStart}
+              className="px-8 py-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold text-lg shadow-[0_0_20px_rgba(236,72,153,0.6)] hover:shadow-[0_0_30px_rgba(236,72,153,0.8)] hover:scale-105 transition-all"
+            >
+              Xem Tương Lai
+            </button>
+          </motion.div>
+        ) : step === 'interactive' ? (
+          <motion.div
+            key="interactive"
+            ref={containerRef}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="z-10 w-full h-full absolute inset-0 flex items-center justify-center pointer-events-auto"
+          >
+            <h2 className="absolute top-20 text-3xl font-bold text-white/50 text-center px-4 w-full animate-pulse pointer-events-none">
+              {clickCount < 4 ? "Hãy nắm bắt vận mệnh của bạn..." : "Tuyệt vời! Bạn đã bắt được nó."}
+            </h2>
             <motion.button
-              onMouseEnter={handleMouseEnter}
-              onClick={handleClick}
-              style={{
-                position: hoverCount > 0 && hoverCount < 5 ? 'absolute' : 'relative',
-                top: hoverCount > 0 && hoverCount < 5 ? buttonPos.top : '2rem',
-                left: hoverCount > 0 && hoverCount < 5 ? buttonPos.left : 'auto',
-                transform: hoverCount > 0 && hoverCount < 5 ? 'translate(-50%, -50%)' : 'none'
+              animate={{ 
+                x: buttonPos.x, 
+                y: buttonPos.y,
+                opacity: glitch ? [1, 0, 1, 0.5, 1] : 1,
+                scale: glitch ? [1, 1.2, 0.8, 1.1, 1] : 1,
+                skew: glitch ? [0, 20, -20, 0] : 0,
               }}
-              animate={{
-                scale: hoverCount === 5 ? [1, 1.1, 1] : 1,
+              transition={{ 
+                type: glitch ? "tween" : "spring", 
+                duration: glitch ? 0.15 : 0.5, 
+                bounce: 0.5 
               }}
-              transition={{
-                duration: 0.3,
-                scale: { repeat: hoverCount === 5 ? Infinity : 0, duration: 1 }
-              }}
-              className={`mt-8 px-10 py-4 rounded-full font-bold text-xl transition-all duration-300 ${
-                hoverCount >= 4 
-                  ? 'bg-gradient-to-r from-emerald-400 to-cyan-500 shadow-[0_0_30px_rgba(52,211,153,0.8)] text-slate-900 hover:scale-110' 
-                  : 'bg-gradient-to-r from-pink-500 to-purple-600 shadow-[0_0_20px_rgba(236,72,153,0.6)] text-white'
+              onMouseEnter={handleHoverButton}
+              onClick={clickCount >= 4 ? handleSuccessClick : handleHoverButton}
+              className={`px-8 py-4 rounded-full font-bold text-xl transition-colors shadow-2xl relative overflow-hidden ${
+                clickCount >= 4 
+                  ? "bg-gradient-to-r from-emerald-400 to-teal-500 text-white shadow-[0_0_30px_rgba(52,211,153,0.8)]"
+                  : "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-[0_0_20px_rgba(236,72,153,0.6)]"
               }`}
             >
-              {hoverCount >= 4 ? 'BẮT ĐẦU NGAY!' : 'BẮT ĐẦU'}
+              {clickCount >= 4 ? "MỞ CÁNH CỬA TƯƠNG LAI ✨" : "BẮT ĐẦU"}
             </motion.button>
-            
-            {hoverCount > 0 && hoverCount < 5 && (
-              <p className="mt-20 text-pink-300 italic text-lg drop-shadow-md">Haha đố bạn bấm được đấy! (Còn {5 - hoverCount} lần)</p>
-            )}
           </motion.div>
         ) : (
           <motion.div
@@ -384,16 +427,32 @@ function App() {
               ))}
             </div>
 
-            <motion.h2 
-              initial={{ y: -50, opacity: 0, scale: 0.8 }}
-              animate={{ y: 0, opacity: 1, scale: 1 }}
-              transition={{ delay: 0.5, type: "spring" }}
-              className="text-4xl md:text-5xl font-extrabold mb-12 text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-pink-300 to-cyan-300 drop-shadow-[0_0_15px_rgba(255,255,255,0.6)] max-w-3xl"
+            {/* Thông điệp từ Admin kết hợp Typewriter (AI giả lập) */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 1 }}
+              className="text-center z-10 pointer-events-none"
             >
-              {textToDisplay}
-            </motion.h2>
+              <h2 className="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-pink-400 to-purple-400 mb-6 drop-shadow-lg">
+                {displayText || "Tương lai của bạn là..."}
+              </h2>
+              
+              {/* AI Typewriter Effect */}
+              <div className="text-xl md:text-2xl text-white/90 font-medium max-w-2xl mx-auto min-h-[80px] px-4 italic bg-black/20 p-6 rounded-2xl backdrop-blur-md border border-white/10">
+                <Typewriter
+                  options={{
+                    strings: [fortune],
+                    autoStart: true,
+                    delay: 50,
+                    cursor: '✨'
+                  }}
+                />
+              </div>
+            </motion.div>
 
-            <div className="flex flex-wrap justify-center items-center gap-6 w-full max-w-6xl px-4 py-8">
+            {/* Khu vực hiển thị nhiều ảnh (Thẻ bài 3D Holographic) */}
+            <div className="flex flex-wrap justify-center items-center gap-4 px-4 py-12 pointer-events-auto">
               {imagesToDisplay.map((item, index) => (
                 <Card key={item.id || index} img={item} index={index} />
               ))}

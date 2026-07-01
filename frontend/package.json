@@ -10,11 +10,15 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@tsparticles/react": "^4.3.0",
+    "@tsparticles/slim": "^4.3.0",
     "axios": "^1.18.1",
     "framer-motion": "^12.42.2",
     "lucide-react": "^1.22.0",
     "react": "^19.2.7",
-    "react-dom": "^19.2.7"
+    "react-dom": "^19.2.7",
+    "react-parallax-tilt": "^1.7.333",
+    "typewriter-effect": "^2.22.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4.3.2",
