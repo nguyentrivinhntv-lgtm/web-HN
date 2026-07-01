@@ -31,6 +31,16 @@ function GalaxyBackground() {
       <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-purple-600/40 blur-[150px] rounded-full animate-pulse"></div>
       <div className="absolute bottom-[-20%] right-[-10%] w-[80%] h-[80%] bg-blue-600/30 blur-[200px] rounded-full"></div>
       <div className="absolute top-[40%] left-[30%] w-[50%] h-[50%] bg-pink-600/30 blur-[150px] rounded-full"></div>
+      
+      {/* Các Hành Tinh 3D bằng CSS */}
+      {/* Hành tinh 1: Xanh dương góc phải trên */}
+      <div className="absolute top-[10%] right-[10%] w-40 h-40 rounded-full bg-gradient-to-tr from-blue-900 via-blue-500 to-cyan-200 shadow-[0_0_60px_rgba(59,130,246,0.6),inset_-15px_-15px_25px_rgba(0,0,0,0.8)] opacity-90 animate-[pulse_4s_infinite]"></div>
+      
+      {/* Hành tinh 2: Đỏ cam góc trái dưới (bự) */}
+      <div className="absolute top-[60%] left-[5%] w-64 h-64 rounded-full bg-gradient-to-br from-orange-500 via-red-600 to-rose-900 shadow-[0_0_80px_rgba(239,68,68,0.5),inset_-20px_-20px_40px_rgba(0,0,0,0.9)] opacity-80 animate-[bounce_6s_infinite]"></div>
+
+      {/* Hành tinh 3: Tím nhỏ */}
+      <div className="absolute top-[75%] right-[20%] w-24 h-24 rounded-full bg-gradient-to-tl from-purple-900 via-fuchsia-600 to-pink-300 shadow-[0_0_40px_rgba(192,38,211,0.6),inset_-10px_-10px_20px_rgba(0,0,0,0.8)] opacity-85"></div>
     </div>
   );
 }
@@ -298,11 +308,11 @@ function App() {
     setFortune(randomFortune);
   };
 
-  const fireworkParticles = Array.from({ length: 40 }).map((_, i) => ({
+  const fireworkParticles = Array.from({ length: 150 }).map((_, i) => ({
     id: i,
-    angle: (i * 360) / 40,
-    velocity: Math.random() * 100 + 50,
-    color: ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FF9F1C'][Math.floor(Math.random() * 4)]
+    angle: (i * 360) / 150,
+    velocity: Math.random() * 200 + 100, // Tốc độ và khoảng cách lan rộng mạnh hơn
+    color: ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FF9F1C', '#D4AF37', '#FF1493'][Math.floor(Math.random() * 6)]
   }));
 
   const imagesToDisplay = contents.length > 0 ? contents : [
@@ -406,20 +416,32 @@ function App() {
             key="result-screen"
             className="z-10 flex flex-col items-center justify-center p-4 text-center w-full min-h-screen"
           >
-            {/* Fireworks Animation */}
-            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-              {fireworkParticles.map(p => (
+            {/* Pháo hoa khổng lồ */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden z-0">
+              {fireworkParticles.map((particle) => (
                 <motion.div
-                  key={p.id}
-                  className="absolute w-2 h-2 rounded-full bg-yellow-300 shadow-[0_0_10px_#fde047]"
-                  initial={{ x: 0, y: 0, opacity: 1, scale: 1 }}
-                  animate={{ 
-                    x: Math.cos(p.angle * Math.PI / 180) * p.velocity,
-                    y: Math.sin(p.angle * Math.PI / 180) * p.velocity + 50, // slight gravity
-                    opacity: 0,
-                    scale: 0
+                  key={particle.id}
+                  initial={{ 
+                    x: "50vw", 
+                    y: "50vh", 
+                    scale: 0, 
+                    opacity: 1 
                   }}
-                  transition={{ duration: 1.5, ease: "easeOut" }}
+                  animate={{ 
+                    x: `calc(50vw + ${Math.cos(particle.angle) * particle.velocity * 5}px)`, 
+                    y: `calc(50vh + ${Math.sin(particle.angle) * particle.velocity * 5}px)`,
+                    scale: [0, 4, 0],
+                    opacity: [1, 1, 0]
+                  }}
+                  transition={{ 
+                    duration: Math.random() * 2 + 1.5,
+                    ease: "easeOut" 
+                  }}
+                  className="absolute w-6 h-6 rounded-full"
+                  style={{
+                    backgroundColor: particle.color,
+                    boxShadow: `0 0 30px ${particle.color}, 0 0 60px ${particle.color}`
+                  }}
                 />
               ))}
             </div>
