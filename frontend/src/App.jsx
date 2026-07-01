@@ -24,6 +24,17 @@ const bgMusic = new Audio('https://assets.mixkit.co/active_storage/sfx/139/139-p
 bgMusic.loop = true;
 bgMusic.volume = 0.3;
 
+function GalaxyBackground() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+      {/* Vệt tinh vân bự */}
+      <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-purple-600/40 blur-[150px] rounded-full animate-pulse"></div>
+      <div className="absolute bottom-[-20%] right-[-10%] w-[80%] h-[80%] bg-blue-600/30 blur-[200px] rounded-full"></div>
+      <div className="absolute top-[40%] left-[30%] w-[50%] h-[50%] bg-pink-600/30 blur-[150px] rounded-full"></div>
+    </div>
+  );
+}
+
 function AdminPanel({ onBack }) {
   const [images, setImages] = useState("");
   const [text, setText] = useState("");
@@ -141,14 +152,12 @@ function AdminPanel({ onBack }) {
 }
 
 function Card({ img, index }) {
-  // Trái tim trang trí quanh viền
   const hearts = [
     { top: '-10px', left: '-10px' }, { top: '-10px', right: '-10px' },
     { bottom: '-10px', left: '-10px' }, { bottom: '-10px', right: '-10px' },
     { top: '50%', left: '-15px' }, { top: '50%', right: '-15px' }
   ];
 
-  // Xử lý link ảnh tĩnh từ backend
   const baseUrl = API_URL.replace('/api', '');
   const imageUrl = img.image_url.startsWith('/uploads/') ? baseUrl + img.image_url : img.image_url;
 
@@ -190,11 +199,8 @@ function Card({ img, index }) {
             ease: "linear",
           }}
         >
-          {/* Front of card (The Image) */}
           <div className="absolute inset-0 [backface-visibility:hidden] rounded-xl overflow-hidden border-4 border-pink-400 shadow-[0_0_25px_rgba(236,72,153,0.8)] bg-white">
             <img src={imageUrl} alt="Card" className="w-full h-full object-cover" />
-            
-            {/* Trái tim quanh viền */}
             {hearts.map((pos, i) => (
               <div key={i} className="absolute text-pink-500 text-lg drop-shadow-md animate-pulse" 
                    style={{...pos, transform: pos.top === '50%' ? 'translateY(-50%)' : 'none'}}>
@@ -203,9 +209,7 @@ function Card({ img, index }) {
             ))}
           </div>
 
-          {/* Back of card */}
           <div className="absolute inset-0 [backface-visibility:hidden] [transform:rotateY(180deg)] rounded-xl bg-gradient-to-br from-pink-600 to-purple-800 border-4 border-pink-400 flex items-center justify-center shadow-lg">
-            {/* Trái tim quanh viền mặt sau */}
             {hearts.map((pos, i) => (
               <div key={i} className="absolute text-pink-300 text-lg animate-pulse" 
                    style={{...pos, transform: pos.top === '50%' ? 'translateY(-50%)' : 'none'}}>
@@ -223,22 +227,19 @@ function Card({ img, index }) {
 }
 
 function App() {
-  const [step, setStep] = useState('intro'); // intro -> interactive -> success
+  const [step, setStep] = useState('intro'); 
   const [clickCount, setClickCount] = useState(0);
   const [buttonPos, setButtonPos] = useState({ x: 0, y: 0 });
   const [contents, setContents] = useState([]);
   const [displayText, setDisplayText] = useState("");
   const [isAdminOpen, setIsAdminOpen] = useState(false);
   const [glitch, setGlitch] = useState(false);
-  
-  // Custom Fortune for Typewriter
   const [fortune, setFortune] = useState("");
   const [hasStartedMusic, setHasStartedMusic] = useState(false);
 
   const containerRef = useRef(null);
 
   useEffect(() => {
-    // Tải dữ liệu ban đầu
     const fetchContent = async () => {
       try {
         const res = await axios.get(`${API_URL}/content`);
@@ -246,7 +247,6 @@ function App() {
           setContents(res.data);
           setDisplayText(res.data[0].display_text);
         } else {
-          // Fallback if no data
           setDisplayText("Chưa có thông tin tương lai, vui lòng vào Admin để thêm dữ liệu!");
         }
       } catch (err) {
@@ -270,7 +270,6 @@ function App() {
 
   const handleHoverButton = () => {
     if (clickCount < 4) {
-      // Glitch effect before teleporting
       clickSound.play().catch(e=>console.log(e));
       setGlitch(true);
       
@@ -280,24 +279,21 @@ function App() {
         if (!container) return;
         const rect = container.getBoundingClientRect();
         
-        // Randomize button position within container bounds
-        const maxX = rect.width - 150; // button width roughly 150
-        const maxY = rect.height - 60; // button height roughly 60
+        const maxX = rect.width - 150;
+        const maxY = rect.height - 60;
         
         const randomX = Math.random() * maxX - maxX/2;
         const randomY = Math.random() * maxY - maxY/2;
         
         setButtonPos({ x: randomX, y: randomY });
         setClickCount(prev => prev + 1);
-      }, 150); // Glitch duration
+      }, 150);
     }
   };
 
   const handleSuccessClick = () => {
     revealSound.play().catch(e=>console.log(e));
     setStep('success');
-    
-    // Pick a random fortune for the AI fake effect
     const randomFortune = FAKE_FORTUNES[Math.floor(Math.random() * FAKE_FORTUNES.length)];
     setFortune(randomFortune);
   };
@@ -306,6 +302,7 @@ function App() {
     id: i,
     angle: (i * 360) / 40,
     velocity: Math.random() * 100 + 50,
+    color: ['#FF6B6B', '#4ECDC4', '#FFE66D', '#FF9F1C'][Math.floor(Math.random() * 4)]
   }));
 
   const imagesToDisplay = contents.length > 0 ? contents : [
@@ -317,9 +314,9 @@ function App() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#0b0b1a]">
       <MagicCursor />
+      <GalaxyBackground />
       <ParticlesBackground />
 
-      {/* Nút vào Admin hiển thị rõ ràng */}
       <button 
         onClick={() => setIsAdminOpen(true)}
         className="absolute bottom-4 right-4 z-50 px-4 py-2 bg-slate-800/50 hover:bg-slate-700/80 text-slate-300 rounded-lg backdrop-blur-sm border border-slate-600 transition-all text-sm font-medium shadow-lg"
