@@ -28,19 +28,19 @@ function GalaxyBackground() {
   return (
     <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
       {/* Vệt tinh vân bự */}
-      <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-purple-600/40 blur-[150px] rounded-full animate-pulse"></div>
-      <div className="absolute bottom-[-20%] right-[-10%] w-[80%] h-[80%] bg-blue-600/30 blur-[200px] rounded-full"></div>
-      <div className="absolute top-[40%] left-[30%] w-[50%] h-[50%] bg-pink-600/30 blur-[150px] rounded-full"></div>
+      <div className="absolute top-[-20%] left-[-10%] w-[70%] h-[70%] bg-purple-600/40 blur-[100px] md:blur-[150px] rounded-full animate-pulse"></div>
+      <div className="absolute bottom-[-20%] right-[-10%] w-[80%] h-[80%] bg-blue-600/30 blur-[120px] md:blur-[200px] rounded-full"></div>
+      <div className="absolute top-[40%] left-[30%] w-[50%] h-[50%] bg-pink-600/30 blur-[100px] md:blur-[150px] rounded-full"></div>
       
-      {/* Các Hành Tinh 3D bằng CSS */}
+      {/* Các Hành Tinh 3D bằng CSS (Thu nhỏ trên Mobile) */}
       {/* Hành tinh 1: Xanh dương góc phải trên */}
-      <div className="absolute top-[10%] right-[10%] w-40 h-40 rounded-full bg-gradient-to-tr from-blue-900 via-blue-500 to-cyan-200 shadow-[0_0_60px_rgba(59,130,246,0.6),inset_-15px_-15px_25px_rgba(0,0,0,0.8)] opacity-90 animate-[pulse_4s_infinite]"></div>
+      <div className="absolute top-[5%] md:top-[10%] right-[5%] md:right-[10%] w-20 h-20 md:w-40 md:h-40 rounded-full bg-gradient-to-tr from-blue-900 via-blue-500 to-cyan-200 shadow-[0_0_30px_rgba(59,130,246,0.6),inset_-10px_-10px_20px_rgba(0,0,0,0.8)] opacity-90 animate-[pulse_4s_infinite]"></div>
       
       {/* Hành tinh 2: Đỏ cam góc trái dưới (bự) */}
-      <div className="absolute top-[60%] left-[5%] w-64 h-64 rounded-full bg-gradient-to-br from-orange-500 via-red-600 to-rose-900 shadow-[0_0_80px_rgba(239,68,68,0.5),inset_-20px_-20px_40px_rgba(0,0,0,0.9)] opacity-80 animate-[bounce_6s_infinite]"></div>
+      <div className="absolute top-[65%] md:top-[60%] left-[-10%] md:left-[5%] w-32 h-32 md:w-64 md:h-64 rounded-full bg-gradient-to-br from-orange-500 via-red-600 to-rose-900 shadow-[0_0_40px_rgba(239,68,68,0.5),inset_-15px_-15px_30px_rgba(0,0,0,0.9)] opacity-80 animate-[bounce_6s_infinite]"></div>
 
       {/* Hành tinh 3: Tím nhỏ */}
-      <div className="absolute top-[75%] right-[20%] w-24 h-24 rounded-full bg-gradient-to-tl from-purple-900 via-fuchsia-600 to-pink-300 shadow-[0_0_40px_rgba(192,38,211,0.6),inset_-10px_-10px_20px_rgba(0,0,0,0.8)] opacity-85"></div>
+      <div className="absolute top-[80%] md:top-[75%] right-[10%] md:right-[20%] w-16 h-16 md:w-24 md:h-24 rounded-full bg-gradient-to-tl from-purple-900 via-fuchsia-600 to-pink-300 shadow-[0_0_20px_rgba(192,38,211,0.6),inset_-8px_-8px_15px_rgba(0,0,0,0.8)] opacity-85"></div>
     </div>
   );
 }
@@ -171,12 +171,14 @@ function Card({ img, index }) {
   const baseUrl = API_URL.replace('/api', '');
   const imageUrl = img.image_url.startsWith('/uploads/') ? baseUrl + img.image_url : img.image_url;
 
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
+
   return (
     <motion.div
-      className="relative w-40 h-56 md:w-52 md:h-72 shrink-0"
+      className="relative w-36 h-48 md:w-52 md:h-72 shrink-0"
       style={{
-        marginTop: index % 2 !== 0 ? '60px' : '0px',
-        marginLeft: index !== 0 ? '-20px' : '0px', 
+        marginTop: index % 2 !== 0 ? (isMobile ? '30px' : '60px') : '0px',
+        marginLeft: index !== 0 ? (isMobile ? '-10px' : '-20px') : '0px', 
         zIndex: 50 - index 
       }}
       initial={{ y: 100, opacity: 0 }}
@@ -289,8 +291,12 @@ function App() {
         if (!container) return;
         const rect = container.getBoundingClientRect();
         
-        const maxX = rect.width - 150;
-        const maxY = rect.height - 60;
+        // Randomize button position within container bounds (Tối ưu cho màn hình nhỏ)
+        const btnWidth = window.innerWidth < 768 ? 160 : 200;
+        const btnHeight = 60;
+        
+        const maxX = Math.max(0, rect.width - btnWidth);
+        const maxY = Math.max(0, rect.height - btnHeight);
         
         const randomX = Math.random() * maxX - maxX/2;
         const randomY = Math.random() * maxY - maxY/2;
@@ -356,21 +362,21 @@ function App() {
             transition={{ duration: 0.8 }}
             className="z-10 text-center flex flex-col items-center pointer-events-auto"
           >
-            <h1 className="text-5xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 mb-8 drop-shadow-[0_0_15px_rgba(236,72,153,0.5)]">
+            <h1 className="text-4xl md:text-7xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 via-purple-400 to-indigo-400 mb-6 drop-shadow-[0_0_15px_rgba(236,72,153,0.5)]">
               Tiên Tri Tương Lai
             </h1>
-            <p className="text-white/80 text-lg mb-12 max-w-md px-4">
+            <p className="text-white/80 text-base md:text-lg mb-8 max-w-md px-4">
               Bạn đã sẵn sàng để khám phá những bí ẩn mà vũ trụ đã sắp đặt cho mình? Hãy nhập thông tin của bạn vào bên dưới.
             </p>
             <input 
               type="text" 
-              placeholder="Nhập tên hoặc thông tin của bạn..." 
-              className="px-6 py-4 rounded-full w-80 max-w-[90vw] text-slate-900 bg-white/90 backdrop-blur-md shadow-xl border-2 border-pink-400/50 focus:outline-none focus:border-pink-500 focus:ring-4 ring-pink-500/30 transition-all text-center font-medium mb-8"
+              placeholder="Nhập tên của bạn..." 
+              className="px-6 py-4 rounded-full w-[90vw] md:w-80 text-slate-900 bg-white/90 backdrop-blur-md shadow-xl border-2 border-pink-400/50 focus:outline-none focus:border-pink-500 focus:ring-4 ring-pink-500/30 transition-all text-center font-medium mb-8"
               autoFocus
             />
             <button 
               onClick={handleInteractiveStart}
-              className="px-8 py-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold text-lg shadow-[0_0_20px_rgba(236,72,153,0.6)] hover:shadow-[0_0_30px_rgba(236,72,153,0.8)] hover:scale-105 transition-all"
+              className="px-6 md:px-8 py-3 rounded-full bg-gradient-to-r from-pink-500 to-purple-600 text-white font-bold text-base md:text-lg shadow-[0_0_20px_rgba(236,72,153,0.6)] hover:shadow-[0_0_30px_rgba(236,72,153,0.8)] hover:scale-105 transition-all w-full max-w-[200px]"
             >
               Xem Tương Lai
             </button>
@@ -402,7 +408,7 @@ function App() {
               }}
               onMouseEnter={handleHoverButton}
               onClick={clickCount >= 4 ? handleSuccessClick : handleHoverButton}
-              className={`px-8 py-4 rounded-full font-bold text-xl transition-colors shadow-2xl relative overflow-hidden ${
+              className={`px-6 md:px-8 py-3 md:py-4 rounded-full font-bold text-lg md:text-xl transition-colors shadow-2xl relative overflow-hidden flex-shrink-0 whitespace-nowrap ${
                 clickCount >= 4 
                   ? "bg-gradient-to-r from-emerald-400 to-teal-500 text-white shadow-[0_0_30px_rgba(52,211,153,0.8)]"
                   : "bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-[0_0_20px_rgba(236,72,153,0.6)]"
@@ -458,7 +464,7 @@ function App() {
               </h2>
               
               {/* AI Typewriter Effect */}
-              <div className="text-xl md:text-2xl text-white/90 font-medium max-w-2xl mx-auto min-h-[80px] px-4 italic bg-black/20 p-6 rounded-2xl backdrop-blur-md border border-white/10">
+              <div className="text-lg md:text-2xl text-white/90 font-medium max-w-xs md:max-w-2xl mx-auto min-h-[100px] md:min-h-[80px] px-2 md:px-4 italic bg-black/20 p-4 md:p-6 rounded-2xl backdrop-blur-md border border-white/10 flex items-center justify-center">
                 <Typewriter
                   options={{
                     strings: [fortune],
@@ -471,7 +477,7 @@ function App() {
             </motion.div>
 
             {/* Khu vực hiển thị nhiều ảnh (Thẻ bài 3D Holographic) */}
-            <div className="flex flex-wrap justify-center items-center gap-4 px-4 py-12 pointer-events-auto">
+            <div className="flex flex-wrap justify-center items-center gap-2 md:gap-4 px-2 md:px-4 py-8 md:py-12 pointer-events-auto mt-4">
               {imagesToDisplay.map((item, index) => (
                 <Card key={item.id || index} img={item} index={index} />
               ))}
