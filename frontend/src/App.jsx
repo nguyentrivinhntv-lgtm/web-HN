@@ -420,12 +420,12 @@ function App() {
       <ParticlesBackground />
       
       {/* NÚT ĐIỀU HƯỚNG TRÊN CÙNG */}
-      <div className="absolute top-4 left-0 w-full z-50 flex justify-center pointer-events-auto">
+      <div className="absolute top-4 right-4 md:top-6 md:right-8 z-50 pointer-events-auto">
         <a 
           href="#space-gallery" 
-          className="px-6 py-2 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 rounded-full text-cyan-300 font-bold text-sm md:text-base transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] flex items-center gap-2"
+          className="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full text-cyan-300 font-bold text-xs md:text-sm transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] flex items-center gap-2"
         >
-          <span>🌌</span> CHUYỂN SANG PHÒNG TRANH 3D
+          <span>🌌</span> <span className="hidden sm:inline">CHUYỂN SANG </span>PHÒNG TRANH 3D
         </a>
       </div>
 

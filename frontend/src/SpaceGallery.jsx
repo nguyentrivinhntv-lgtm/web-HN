@@ -269,12 +269,12 @@ export default function SpaceGallery() {
     <div className={`sg-root ${loaded ? 'sg-ready' : ''}`}>
 
       {/* TOP NAVIGATION */}
-      <div className="absolute top-4 left-0 w-full z-50 flex justify-center pointer-events-auto">
+      <div className="absolute top-4 right-4 md:top-6 md:right-8 z-50 pointer-events-auto">
         <a 
           href="#" 
-          className="px-6 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full text-pink-400 font-bold text-sm md:text-base transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] flex items-center gap-2"
+          className="px-4 py-2 bg-white/10 hover:bg-white/20 backdrop-blur-md border border-white/20 rounded-full text-pink-400 font-bold text-xs md:text-sm transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(236,72,153,0.4)] flex items-center gap-2"
         >
-          <span>🔮</span> TRỞ VỀ TRANG CHỦ
+          <span>🔮</span> <span className="hidden sm:inline">TRỞ VỀ </span>TRANG CHỦ
         </a>
       </div>
 
