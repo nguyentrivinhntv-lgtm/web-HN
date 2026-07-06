@@ -46,21 +46,36 @@ function GalaxyBackground() {
 }
 
 function AdminPanel({ onBack }) {
+  const [activeTab, setActiveTab] = useState('fortune'); // 'fortune' | 'gallery'
+
+  // Fortune state
   const [images, setImages] = useState("");
   const [text, setText] = useState("");
+  
+  // Gallery state
+  const [galImage, setGalImage] = useState("");
+  const [galTitle, setGalTitle] = useState("");
+  const [galDesc, setGalDesc] = useState("");
+  const [galTags, setGalTags] = useState("");
+  const [galPhotos, setGalPhotos] = useState([]);
+
   const [isUploading, setIsUploading] = useState(false);
   
+  const fetchGalPhotos = () => {
+    axios.get(`${API_URL}/gallery`).then(res => setGalPhotos(res.data)).catch(() => {});
+  };
+
   useEffect(() => {
-    // Tải dữ liệu hiện tại khi mở Admin
     axios.get(`${API_URL}/content`).then(res => {
       if(res.data && res.data.length > 0) {
         setText(res.data[0].display_text);
         setImages(res.data.map(item => item.image_url).join(',\n'));
       }
     }).catch(() => {});
+    fetchGalPhotos();
   }, []);
 
-  const handleFileUpload = async (e) => {
+  const handleFileUpload = async (e, type) => {
     const files = e.target.files;
     if(!files || files.length === 0) return;
     
@@ -78,9 +93,13 @@ function AdminPanel({ onBack }) {
         uploadedUrls.push(res.data.url);
       }
       
-      // Thêm các URL mới vào textarea
-      const currentUrls = images ? images.split(',').map(u=>u.trim()).filter(Boolean) : [];
-      setImages([...currentUrls, ...uploadedUrls].join(',\n'));
+      if (type === 'fortune') {
+        const currentUrls = images ? images.split(',').map(u=>u.trim()).filter(Boolean) : [];
+        setImages([...currentUrls, ...uploadedUrls].join(',\n'));
+      } else if (type === 'gallery') {
+        // Space gallery only takes 1 image per submit in this basic form
+        setGalImage(uploadedUrls[0]);
+      }
     } catch (err) {
       alert("Lỗi khi tải ảnh lên!");
     } finally {
@@ -88,75 +107,142 @@ function AdminPanel({ onBack }) {
     }
   };
 
-  const handleSave = async () => {
+  const handleSaveFortune = async () => {
     const urls = images.split(',').map(url => url.trim()).filter(Boolean);
     if(urls.length === 0 || !text) return alert("Vui lòng nhập đủ thông tin!");
     
     try {
-      // Gọi API bulk update để lưu chính xác số lượng ảnh
       await axios.post(`${API_URL}/admin/content/bulk`, {
-        images: urls,
-        display_text: text,
-        sparkle_color: "#FFD700"
+        images: urls, display_text: text, sparkle_color: "#FFD700"
       });
-      
       alert(`Đã lưu thành công ${urls.length} ảnh vào Database!`);
     } catch (e) {
       alert("Lỗi khi lưu! Hãy kiểm tra backend đang chạy chưa.");
     }
   };
 
+  const handleSaveGallery = async () => {
+    if(!galImage || !galTitle) return alert("Vui lòng tải ảnh và nhập tiêu đề!");
+    try {
+      await axios.post(`${API_URL}/admin/gallery`, {
+        src: galImage,
+        title: galTitle,
+        description: galDesc,
+        tags: galTags
+      });
+      alert(`Đã thêm ảnh vào Space Gallery thành công!`);
+      setGalImage(""); setGalTitle(""); setGalDesc(""); setGalTags("");
+      fetchGalPhotos();
+    } catch (e) {
+      alert("Lỗi khi lưu! Hãy kiểm tra backend đang chạy chưa.");
+    }
+  };
+
+  const handleDeleteGallery = async (id) => {
+    if(!confirm("Bạn có chắc chắn muốn xóa ảnh này không?")) return;
+    try {
+      await axios.delete(`${API_URL}/admin/gallery/${id}`);
+      fetchGalPhotos();
+    } catch (e) {
+      alert("Lỗi khi xóa ảnh!");
+    }
+  };
+
   return (
-    <div className="z-10 relative bg-slate-800/80 p-8 rounded-2xl backdrop-blur-md border border-white/10 w-full max-w-md text-white shadow-2xl overflow-y-auto max-h-[90vh]">
-      <h2 className="text-3xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">Trang Quản Trị (Admin)</h2>
+    <div className="z-10 relative bg-slate-800/80 p-6 md:p-8 rounded-2xl backdrop-blur-md border border-white/10 w-full max-w-md text-white shadow-2xl overflow-y-auto max-h-[90vh]">
+      <h2 className="text-2xl md:text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-purple-400">Trang Quản Trị (Admin)</h2>
       
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Tải ảnh lên từ máy tính:</label>
-        <div className="relative border-2 border-dashed border-slate-600 rounded-lg p-4 text-center hover:border-pink-500 transition-colors bg-slate-900/50">
-          <input 
-            type="file" 
-            multiple 
-            accept="image/*"
-            onChange={handleFileUpload}
-            disabled={isUploading}
-            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
-          />
-          <div className="pointer-events-none">
-            {isUploading ? "Đang tải lên..." : "📁 Nhấp vào đây để chọn ảnh"}
+      {/* Tabs */}
+      <div className="flex mb-6 border-b border-slate-600">
+        <button 
+          onClick={() => setActiveTab('fortune')}
+          className={`flex-1 pb-2 text-sm font-semibold transition-colors ${activeTab === 'fortune' ? 'text-pink-400 border-b-2 border-pink-400' : 'text-slate-400 hover:text-white'}`}
+        >
+          Lời Tiên Tri
+        </button>
+        <button 
+          onClick={() => setActiveTab('gallery')}
+          className={`flex-1 pb-2 text-sm font-semibold transition-colors ${activeTab === 'gallery' ? 'text-pink-400 border-b-2 border-pink-400' : 'text-slate-400 hover:text-white'}`}
+        >
+          Space Gallery
+        </button>
+      </div>
+
+      {activeTab === 'fortune' && (
+        <div className="animate-fade-in">
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Tải ảnh lên (nhiều ảnh):</label>
+            <div className="relative border-2 border-dashed border-slate-600 rounded-lg p-4 text-center hover:border-pink-500 transition-colors bg-slate-900/50">
+              <input type="file" multiple accept="image/*" onChange={(e) => handleFileUpload(e, 'fortune')} disabled={isUploading} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" />
+              <div className="pointer-events-none">{isUploading ? "Đang tải lên..." : "📁 Nhấp vào đây để chọn ảnh"}</div>
+            </div>
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Hoặc nhập link hình ảnh (cách nhau bởi dấu phẩy):</label>
+            <textarea rows="4" value={images} onChange={e => setImages(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-pink-500 focus:outline-none text-sm" placeholder="https://anh1.jpg, https://anh2.jpg..." />
+          </div>
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2">Dòng chữ kết quả:</label>
+            <input type="text" value={text} onChange={e => setText(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-pink-500 focus:outline-none" placeholder="Tương lai của bạn..." />
+          </div>
+          <div className="flex gap-4">
+            <button onClick={handleSaveFortune} className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 font-bold py-3 rounded-lg hover:opacity-90 transition">LƯU DỮ LIỆU</button>
+            <button onClick={onBack} className="px-6 py-3 bg-slate-700 rounded-lg hover:bg-slate-600 transition">Đóng</button>
           </div>
         </div>
-      </div>
+      )}
 
-      <div className="mb-4">
-        <label className="block text-sm font-medium mb-2">Hoặc nhập trực tiếp các link hình ảnh (cách nhau bởi dấu phẩy):</label>
-        <textarea 
-          rows="4"
-          value={images}
-          onChange={e => setImages(e.target.value)}
-          className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-pink-500 focus:outline-none text-sm"
-          placeholder="https://anh1.jpg, https://anh2.jpg..."
-        />
-      </div>
+      {activeTab === 'gallery' && (
+        <div className="animate-fade-in">
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Tải 1 ảnh lên:</label>
+            <div className="relative border-2 border-dashed border-slate-600 rounded-lg p-4 text-center hover:border-pink-500 transition-colors bg-slate-900/50">
+              <input type="file" accept="image/*" onChange={(e) => handleFileUpload(e, 'gallery')} disabled={isUploading} className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed" />
+              <div className="pointer-events-none">{isUploading ? "Đang tải lên..." : "📁 Nhấp vào đây để chọn ảnh"}</div>
+            </div>
+            {galImage && <div className="mt-2 text-xs text-green-400 break-all">Đã tải ảnh: {galImage}</div>}
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Hoặc dán Link URL ảnh:</label>
+            <input type="text" value={galImage} onChange={e => setGalImage(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:border-pink-500 focus:outline-none text-sm" placeholder="https://..." />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Tiêu đề (Bắt buộc):</label>
+            <input type="text" value={galTitle} onChange={e => setGalTitle(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:border-pink-500 focus:outline-none" />
+          </div>
+          <div className="mb-4">
+            <label className="block text-sm font-medium mb-2">Mô tả chi tiết:</label>
+            <textarea rows="2" value={galDesc} onChange={e => setGalDesc(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:border-pink-500 focus:outline-none text-sm" />
+          </div>
+          <div className="mb-6">
+            <label className="block text-sm font-medium mb-2">Tags (cách nhau bởi dấu phẩy):</label>
+            <input type="text" value={galTags} onChange={e => setGalTags(e.target.value)} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2 text-white focus:border-pink-500 focus:outline-none text-sm" placeholder="đàlạt, hoahồng, đêm..." />
+          </div>
+          <div className="flex gap-4 mb-8">
+            <button onClick={handleSaveGallery} className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 font-bold py-3 rounded-lg hover:opacity-90 transition">THÊM VÀO GALLERY</button>
+            <button onClick={onBack} className="px-6 py-3 bg-slate-700 rounded-lg hover:bg-slate-600 transition">Đóng</button>
+          </div>
 
-      <div className="mb-6">
-        <label className="block text-sm font-medium mb-2">Dòng chữ kết quả:</label>
-        <input 
-          type="text"
-          value={text}
-          onChange={e => setText(e.target.value)}
-          className="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-white focus:border-pink-500 focus:outline-none"
-          placeholder="Tương lai của bạn..."
-        />
-      </div>
-
-      <div className="flex gap-4">
-        <button onClick={handleSave} className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 font-bold py-3 rounded-lg hover:opacity-90 transition">
-          LƯU DỮ LIỆU
-        </button>
-        <button onClick={onBack} className="px-6 py-3 bg-slate-700 rounded-lg hover:bg-slate-600 transition">
-          Đóng
-        </button>
-      </div>
+          <hr className="border-slate-600 mb-6" />
+          <h3 className="text-xl font-bold mb-4 text-cyan-400">Ảnh đã tải lên ({galPhotos.length})</h3>
+          <div className="space-y-3 max-h-60 overflow-y-auto pr-2">
+            {galPhotos.length === 0 ? (
+              <p className="text-slate-400 text-sm">Chưa có ảnh nào. Gallery sẽ dùng ảnh mẫu.</p>
+            ) : (
+              galPhotos.map(photo => (
+                <div key={photo.id} className="flex items-center gap-4 bg-slate-900 p-2 rounded-lg border border-slate-700">
+                  <img src={photo.src.startsWith('/') && !photo.src.startsWith('http') ? API_URL.replace('/api','') + photo.src : photo.src} alt={photo.title} className="w-16 h-16 object-cover rounded" />
+                  <div className="flex-1 overflow-hidden">
+                    <h4 className="font-bold text-sm truncate">{photo.title}</h4>
+                    <p className="text-xs text-slate-400 truncate">{photo.description}</p>
+                  </div>
+                  <button onClick={() => handleDeleteGallery(photo.id)} className="px-3 py-2 bg-red-500/20 text-red-400 hover:bg-red-500 hover:text-white rounded transition">Xóa</button>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -328,10 +414,20 @@ function App() {
   ];
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#0b0b1a]">
+    <div className="min-h-screen bg-slate-900 text-white overflow-hidden relative font-sans selection:bg-pink-500/30">
       <MagicCursor />
       <GalaxyBackground />
       <ParticlesBackground />
+      
+      {/* NÚT ĐIỀU HƯỚNG TRÊN CÙNG */}
+      <div className="absolute top-4 left-0 w-full z-50 flex justify-center pointer-events-auto">
+        <a 
+          href="#space-gallery" 
+          className="px-6 py-2 bg-white/5 hover:bg-white/10 backdrop-blur-md border border-white/10 rounded-full text-cyan-300 font-bold text-sm md:text-base transition-all hover:scale-105 hover:shadow-[0_0_20px_rgba(34,211,238,0.4)] flex items-center gap-2"
+        >
+          <span>🌌</span> CHUYỂN SANG PHÒNG TRANH 3D
+        </a>
+      </div>
 
       <button 
         onClick={() => setIsAdminOpen(true)}

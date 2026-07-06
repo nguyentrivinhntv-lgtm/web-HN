@@ -9,7 +9,7 @@ import os
 import shutil
 
 from database import engine, get_db, Base
-from models import FutureContent
+from models import FutureContent, GalleryPhoto
 
 # Create tables
 Base.metadata.create_all(bind=engine)
@@ -45,6 +45,22 @@ class ContentCreate(BaseModel):
     display_text: str
     sparkle_color: str = "#FFD700"
 
+from typing import Optional
+
+class GalleryPhotoBase(BaseModel):
+    src: str
+    title: str
+    description: Optional[str] = None
+    tags: Optional[str] = None
+
+class GalleryPhotoCreate(GalleryPhotoBase):
+    pass
+
+class GalleryPhotoResponse(GalleryPhotoBase):
+    id: int
+    class Config:
+        orm_mode = True
+
 @app.get("/api/content", response_model=List[ContentResponse])
 def get_content(db: Session = Depends(get_db)):
     content = db.query(FutureContent).all()
@@ -57,6 +73,28 @@ def create_content(content: ContentCreate, db: Session = Depends(get_db)):
     db.commit()
     db.refresh(db_content)
     return db_content
+
+@app.get("/api/gallery", response_model=List[GalleryPhotoResponse])
+def get_gallery_photos(db: Session = Depends(get_db)):
+    return db.query(GalleryPhoto).all()
+
+@app.post("/api/admin/gallery", response_model=GalleryPhotoResponse)
+def create_gallery_photo(photo: GalleryPhotoCreate, db: Session = Depends(get_db)):
+    db_photo = GalleryPhoto(**photo.dict())
+    db.add(db_photo)
+    db.commit()
+    db.refresh(db_photo)
+    return db_photo
+
+@app.delete("/api/admin/gallery/{photo_id}")
+def delete_gallery_photo(photo_id: int, db: Session = Depends(get_db)):
+    db_photo = db.query(GalleryPhoto).filter(GalleryPhoto.id == photo_id).first()
+    if not db_photo:
+        raise HTTPException(status_code=404, detail="Photo not found")
+    db.delete(db_photo)
+    db.commit()
+    return {"message": "Photo deleted"}
+
 
 class BulkContentCreate(BaseModel):
     images: List[str]
