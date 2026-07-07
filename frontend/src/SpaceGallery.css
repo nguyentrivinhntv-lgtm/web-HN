@@ -145,83 +145,104 @@
   /* opacity set by JS */
 }
 
-/* === PLANET === */
-.sg-planet-wrap {
+/* === TECH LIGHT PILLAR === */
+.sg-tech-pillar-wrap {
   position: absolute;
   top: 50%; left: 50%;
   transform: translate(-50%,-50%);
-  width: 180px; height: 180px;
+  width: 120px; height: 600px;
   z-index: 5;
-  animation: sg-planet-float 10s ease-in-out infinite;
+  animation: sg-pillar-float 8s ease-in-out infinite;
+  transform-style: preserve-3d;
 }
-@keyframes sg-planet-float {
+@keyframes sg-pillar-float {
   0%, 100% { transform: translate(-50%,-50%) translateY(0); }
-  50% { transform: translate(-50%,-50%) translateY(-15px); }
+  50% { transform: translate(-50%,-50%) translateY(-20px); }
 }
-.sg-planet {
-  position: absolute; inset: 0;
+.sg-pillar-core {
+  position: absolute;
+  top: 10%; bottom: 10%; left: 50%;
+  width: 20px;
+  transform: translateX(-50%);
+  background: linear-gradient(to top, rgba(0,255,200,0), #00ffc8 20%, #ffffff 50%, #00ffc8 80%, rgba(0,255,200,0));
+  box-shadow: 0 0 40px #00ffc8, 0 0 80px #00ffc8;
+  border-radius: 100px;
+  animation: sg-pillar-pulse 2s ease-in-out infinite alternate;
+}
+@keyframes sg-pillar-pulse {
+  0% { opacity: 0.8; filter: brightness(1); }
+  100% { opacity: 1; filter: brightness(1.5); }
+}
+.sg-pillar-hologram {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 4px, rgba(0,255,200,0.1) 5px, rgba(0,255,200,0.1) 6px);
+  border: 1px solid rgba(0,255,200,0.3);
+  border-radius: 60px;
+  box-shadow: inset 0 0 30px rgba(0,255,200,0.2);
+  animation: sg-holo-scan 4s linear infinite;
+  -webkit-mask-image: linear-gradient(to top, transparent, black 15%, black 85%, transparent);
+  mask-image: linear-gradient(to top, transparent, black 15%, black 85%, transparent);
+}
+@keyframes sg-holo-scan {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 100px; }
+}
+.sg-pillar-rings {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 240px; height: 240px;
+  transform: translate(-50%,-50%) rotateX(75deg);
+  transform-style: preserve-3d;
+}
+.sg-pillar-ring {
+  position: absolute;
+  inset: 0;
   border-radius: 50%;
-  background: radial-gradient(circle at 35% 30%,
-    #f8e8ff, #d8b4fe 15%, #a78bfa 30%, #7c3aed 50%, #5b21b6 70%, #3b0764);
-  box-shadow:
-    0 0 60px rgba(168,85,247,0.6),
-    0 0 120px rgba(168,85,247,0.3),
-    inset -20px -20px 40px rgba(0,0,0,0.5),
-    inset 10px 10px 30px rgba(255,255,255,0.15);
-  animation: sg-planet-glow 4s ease-in-out infinite;
+  border: 2px dashed rgba(0,255,200,0.6);
+  border-top-color: #00ffc8;
+  border-bottom-color: #00ffc8;
+  box-shadow: 0 0 15px rgba(0,255,200,0.4), inset 0 0 10px rgba(0,255,200,0.2);
+  animation: sg-ring-spin calc(8s + var(--i)*2s) linear infinite;
+  transform: translateZ(calc((var(--i) - 2) * 80px));
 }
-.sg-planet-hl {
-  position: absolute; top: 8%; left: 15%;
-  width: 35%; height: 25%;
-  border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(255,255,255,0.5), transparent 70%);
-  filter: blur(5px);
-}
-@keyframes sg-planet-glow {
-  0%,100% { box-shadow: 0 0 60px rgba(168,85,247,0.6), 0 0 120px rgba(168,85,247,0.3); }
-  50%     { box-shadow: 0 0 80px rgba(168,85,247,0.8), 0 0 180px rgba(168,85,247,0.4); }
-}
-
-/* Ring */
-.sg-ring-wrap {
-  position: absolute; top: 50%; left: 50%;
-  width: 310px; height: 310px;
-  transform: translate(-50%,-50%) rotateX(72deg);
-  pointer-events: none;
-}
-.sg-ring1, .sg-ring2 {
-  position: absolute; inset: 0;
-  border-radius: 50%;
-  border: 10px solid transparent;
-  border-top-color: rgba(255,200,255,0.45);
-  border-bottom-color: rgba(200,160,255,0.25);
-  border-left-color: rgba(255,180,230,0.35);
-  border-right-color: rgba(180,140,255,0.35);
-  animation: sg-ring-spin 12s linear infinite;
-  filter: blur(1px);
-  box-shadow: 0 0 20px rgba(236,72,153,0.3);
-}
-.sg-ring2 {
-  inset: 18px; border-width: 5px;
-  animation-duration: 18s; animation-direction: reverse;
-  opacity: 0.6;
+.sg-pillar-ring:nth-child(even) {
+  animation-direction: reverse;
+  border: 2px solid rgba(0,255,200,0.2);
+  border-left-color: #00ffc8;
+  border-right-color: #00ffc8;
 }
 @keyframes sg-ring-spin {
-  to { transform: rotate(360deg); }
+  to { transform: translateZ(calc((var(--i) - 2) * 80px)) rotateZ(360deg); }
 }
-
-.sg-planet-glow {
-  position: absolute; top: 50%; left: 50%;
-  width: 350px; height: 350px;
+.sg-pillar-particles {
+  position: absolute;
+  inset: 0;
+  background-image: radial-gradient(circle, #00ffc8 1px, transparent 1px);
+  background-size: 20px 40px;
+  background-position: 0 0;
+  opacity: 0.3;
+  animation: sg-particle-flow 3s linear infinite;
+  -webkit-mask-image: linear-gradient(to top, transparent, black, transparent);
+  mask-image: linear-gradient(to top, transparent, black, transparent);
+}
+@keyframes sg-particle-flow {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 -40px; }
+}
+.sg-pillar-glow {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 400px; height: 600px;
   transform: translate(-50%,-50%);
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(168,85,247,0.12), rgba(236,72,153,0.06) 40%, transparent 70%);
+  background: radial-gradient(ellipse at center, rgba(0,255,200,0.15) 0%, rgba(0,255,200,0.05) 40%, transparent 70%);
   pointer-events: none;
-  animation: sg-breathe 3s ease-in-out infinite alternate;
+  border-radius: 50%;
+  animation: sg-glow-breathe 4s ease-in-out infinite alternate;
 }
-@keyframes sg-breathe {
-  from { transform: translate(-50%,-50%) scale(1); }
-  to   { transform: translate(-50%,-50%) scale(1.15); }
+@keyframes sg-glow-breathe {
+  from { opacity: 0.7; transform: translate(-50%,-50%) scale(0.9); }
+  to   { opacity: 1; transform: translate(-50%,-50%) scale(1.1); }
 }
 
 /* === ORBITING 3D BLOCKS === */
@@ -248,16 +269,143 @@
   to { transform: rotateZ(-20deg) rotateX(-15deg) rotateY(0deg); }
 }
 
-.sg-orbit-cloud {
+.sg-orbit-block {
   position: absolute;
+  top: -30px; left: -20px;
+  width: 40px; height: 60px;
+  background: rgba(0,255,200,0.05);
+  border: 1px solid rgba(0,255,200,0.5);
+  border-radius: 4px;
   transform-style: preserve-3d;
   /* Orbit position */
   transform: rotateY(calc(var(--i) * (360deg / var(--total)))) translateZ(var(--r));
   animation: sg-cloud-bob 4s ease-in-out calc(var(--i) * 0.3s) infinite alternate;
+  display: flex; align-items: center; justify-content: center;
+  overflow: hidden;
 }
+.sg-orbit-block::before {
+  content: '';
+  position: absolute; inset: 2px;
+  border: 1px dashed rgba(0,255,200,0.3);
+}
+.sg-panel-inner {
+  width: 100%; height: 2px;
+  background: #00ffc8;
+  box-shadow: 0 0 10px #00ffc8;
+  animation: sg-panel-scan 2s linear infinite;
+}
+@keyframes sg-panel-scan {
+  0% { transform: translateY(-30px); }
+  100% { transform: translateY(30px); }
+}
+.sg-block-cyan {
+  border-color: rgba(0,255,200,0.6);
+  box-shadow: 0 0 15px rgba(0,255,200,0.2), inset 0 0 10px rgba(0,255,200,0.2);
+}
+.sg-block-cyan .sg-panel-inner { background: #00ffc8; box-shadow: 0 0 10px #00ffc8; }
+.sg-block-cyan::before { border-color: rgba(0,255,200,0.4); }
+
+.sg-block-pink {
+  border-color: rgba(255,0,136,0.6);
+  box-shadow: 0 0 15px rgba(255,0,136,0.2), inset 0 0 10px rgba(255,0,136,0.2);
+}
+.sg-block-pink .sg-panel-inner { background: #ff0088; box-shadow: 0 0 10px #ff0088; }
+.sg-block-pink::before { border-color: rgba(255,0,136,0.4); }
+
 @keyframes sg-cloud-bob {
-  0% { transform: rotateY(calc(var(--i) * (360deg / var(--total)))) translateZ(var(--r)) translateY(-25px); }
-  100% { transform: rotateY(calc(var(--i) * (360deg / var(--total)))) translateZ(var(--r)) translateY(25px); }
+  0% { transform: rotateY(calc(var(--i) * (360deg / var(--total)))) translateZ(var(--r)) translateY(-30px); }
+  100% { transform: rotateY(calc(var(--i) * (360deg / var(--total)))) translateZ(var(--r)) translateY(30px); }
+}
+
+/* === CYBER HUD & TECH DETAILS === */
+.sg-cyber-huds {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform-style: preserve-3d;
+  z-index: 4; /* Behind the main pillar but in 3D space */
+}
+
+/* Giant HUD Rings in 3D space */
+.sg-hud-ring {
+  position: absolute;
+  top: 0%; left: 0%;
+  border-radius: 50%;
+  transform-style: preserve-3d;
+  pointer-events: none;
+}
+.sg-hud-1 {
+  width: 800px; height: 800px;
+  border: 2px dashed rgba(0, 255, 200, 0.2);
+  border-left: 2px solid transparent;
+  border-right: 2px solid transparent;
+  transform: translate(-50%, -50%) rotateX(90deg) translateZ(0);
+  animation: sg-hud-spin 40s linear infinite;
+}
+.sg-hud-2 {
+  width: 1200px; height: 1200px;
+  border: 1px dotted rgba(0, 200, 255, 0.3);
+  transform: translate(-50%, -50%) rotateX(90deg) translateZ(-80px);
+  animation: sg-hud-spin 50s linear infinite reverse;
+}
+.sg-hud-3 {
+  width: 1600px; height: 1600px;
+  border: 3px double rgba(255, 0, 150, 0.15);
+  transform: translate(-50%, -50%) rotateX(80deg) translateZ(150px);
+  animation: sg-hud-spin 60s linear infinite;
+}
+@keyframes sg-hud-spin {
+  0% { transform: translate(-50%, -50%) rotateX(90deg) rotateZ(0deg); }
+  100% { transform: translate(-50%, -50%) rotateX(90deg) rotateZ(360deg); }
+}
+
+/* Floating Cyber Lines (Data Streams) */
+.sg-cyber-lines {
+  position: absolute;
+  transform-style: preserve-3d;
+}
+.sg-cyber-line {
+  position: absolute;
+  top: 0; left: 0;
+  width: 2px; height: 250px;
+  background: linear-gradient(to bottom, transparent, #00ffc8, transparent);
+  opacity: 0;
+  transform: 
+    rotateY(calc(var(--i) * 18deg)) 
+    translateZ(calc(400px + (var(--i) * 40px))) 
+    translateY(calc(-500px + (var(--i) * 60px)));
+  animation: sg-data-fall calc(3s + (var(--i) * 0.2s)) linear infinite;
+  animation-delay: calc(var(--i) * -0.5s);
+}
+.sg-cyber-line:nth-child(even) {
+  background: linear-gradient(to bottom, transparent, #ff0088, transparent);
+  height: 180px;
+  animation-direction: reverse;
+}
+@keyframes sg-data-fall {
+  0% { transform: rotateY(calc(var(--i) * 18deg)) translateZ(calc(400px + (var(--i) * 40px))) translateY(-800px); opacity: 0; }
+  20% { opacity: 0.6; }
+  80% { opacity: 0.6; }
+  100% { transform: rotateY(calc(var(--i) * 18deg)) translateZ(calc(400px + (var(--i) * 40px))) translateY(800px); opacity: 0; }
+}
+
+/* Cyber Grid Background Wrapper */
+.sg-cyber-grid {
+  position: absolute;
+  top: 0; left: 0;
+  width: 3000px; height: 3000px;
+  transform: translate(-50%, -50%) translateZ(-1000px);
+  background-image: 
+    linear-gradient(90deg, rgba(0, 255, 200, 0.05) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(0, 255, 200, 0.05) 1px, transparent 1px);
+  background-size: 60px 60px;
+  opacity: 0.4;
+  animation: sg-hex-move 20s linear infinite;
+  border-radius: 50%;
+  -webkit-mask-image: radial-gradient(circle, black 30%, transparent 70%);
+  mask-image: radial-gradient(circle, black 30%, transparent 70%);
+}
+@keyframes sg-hex-move {
+  to { background-position: 60px 60px; }
 }
 
 /* 2D Rainbow Nebula (Tinh Vân 7 Sắc) */
@@ -453,8 +601,8 @@
 
 /* === RESPONSIVE === */
 @media (max-width: 768px) {
-  .sg-planet-wrap { width: 120px; height: 120px; }
-  .sg-ring-wrap { width: 200px; height: 200px; }
+  .sg-tech-pillar-wrap { width: 80px; height: 400px; }
+  .sg-pillar-rings { width: 160px; height: 160px; }
   .sg-frame { width: 90px; height: 120px; margin-left: -45px; margin-top: -60px; }
   .sg-title-bar h2 { font-size: 1.3rem; }
   .sg-lb-box { flex-direction: column; }
@@ -462,6 +610,255 @@
 }
 @media (max-width: 480px) {
   .sg-frame { width: 70px; height: 95px; margin-left: -35px; margin-top: -47px; }
-  .sg-planet-wrap { width: 90px; height: 90px; }
-  .sg-ring-wrap { width: 150px; height: 150px; }
+  .sg-tech-pillar-wrap { width: 60px; height: 300px; }
+  .sg-pillar-rings { width: 120px; height: 120px; }
+}
+
+/* === CINEMATIC MODE === */
+.sg-scene.sg-cinematic-mode .sg-frame:not(.sg-selected) {
+  opacity: 0.05 !important;
+  filter: blur(6px);
+  pointer-events: none;
+  transition: opacity 0.8s, filter 0.8s;
+}
+.sg-scene.sg-cinematic-mode .sg-tech-pillar-wrap,
+.sg-scene.sg-cinematic-mode .sg-cyber-huds,
+.sg-scene.sg-cinematic-mode .sg-orbit-ring {
+  opacity: 0.05;
+  transition: opacity 1s;
+}
+
+/* Selected frame scales up BIG */
+.sg-frame.sg-selected .sg-frame-inner {
+  transform: scale(2.5);
+  border-color: rgba(0, 255, 200, 0.6);
+  box-shadow:
+    0 0 40px rgba(0, 255, 200, 0.5),
+    0 0 80px rgba(0, 255, 200, 0.2),
+    0 0 120px rgba(0, 200, 255, 0.15),
+    inset 0 0 30px rgba(0, 255, 200, 0.1);
+  transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.5s, box-shadow 0.5s;
+}
+.sg-frame.sg-selected img {
+  transform: scale(1);
+}
+.sg-frame.sg-selected::before {
+  opacity: 1;
+}
+
+/* === HOLOGRAM PANELS CONTAINER === */
+.sg-holo-container {
+  position: absolute;
+  top: 50%; left: 50%;
+  width: 0; height: 0;
+  transform-style: preserve-3d;
+  pointer-events: none;
+  z-index: 10;
+}
+
+/* === HOLOGRAM PANEL (shared) === */
+.sg-holo-panel {
+  position: absolute;
+  background: rgba(0, 20, 15, 0.75);
+  border: 1px solid rgba(0, 255, 200, 0.35);
+  border-radius: 10px;
+  padding: 14px 18px;
+  box-shadow:
+    inset 0 0 25px rgba(0, 255, 200, 0.08),
+    0 0 30px rgba(0, 255, 200, 0.1);
+  color: #00ffc8;
+  font-family: 'Orbitron', sans-serif;
+  opacity: 0;
+  backdrop-filter: blur(8px);
+  overflow: hidden;
+}
+.sg-holo-panel::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(
+    0deg, transparent, transparent 2px,
+    rgba(0, 255, 200, 0.06) 3px, rgba(0, 255, 200, 0.06) 4px
+  );
+  pointer-events: none;
+  border-radius: 10px;
+}
+
+/* Panel positions around the photo */
+.sg-holo-right {
+  left: 260px;
+  top: -120px;
+  width: 240px;
+  transform: rotateY(-12deg);
+  animation: sg-holo-slide-r 0.6s 0.3s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.sg-holo-left {
+  right: 260px;
+  top: -80px;
+  width: 220px;
+  transform: rotateY(12deg);
+  animation: sg-holo-slide-l 0.6s 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.sg-holo-bottom {
+  left: -100px;
+  top: 200px;
+  width: 300px;
+  transform: rotateX(8deg);
+  animation: sg-holo-slide-b 0.6s 0.7s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes sg-holo-slide-r {
+  from { opacity: 0; transform: rotateY(-12deg) translateX(40px); }
+  to   { opacity: 1; transform: rotateY(-12deg) translateX(0); }
+}
+@keyframes sg-holo-slide-l {
+  from { opacity: 0; transform: rotateY(12deg) translateX(-40px); }
+  to   { opacity: 1; transform: rotateY(12deg) translateX(0); }
+}
+@keyframes sg-holo-slide-b {
+  from { opacity: 0; transform: rotateX(8deg) translateY(30px); }
+  to   { opacity: 1; transform: rotateX(8deg) translateY(0); }
+}
+
+/* Scan line inside panels */
+.sg-holo-scan {
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #00ffc8, transparent);
+  box-shadow: 0 0 15px #00ffc8;
+  animation: sg-panel-scan 2.5s linear infinite;
+}
+
+/* Panel typography */
+.sg-holo-panel .sg-holo-label {
+  font-size: 0.55rem;
+  letter-spacing: 2px;
+  color: rgba(0, 255, 200, 0.5);
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.sg-holo-panel .sg-holo-value {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #fff;
+  text-shadow: 0 0 8px rgba(0, 255, 200, 0.6);
+  margin-bottom: 10px;
+  line-height: 1.4;
+}
+.sg-holo-panel .sg-holo-value:last-child {
+  margin-bottom: 0;
+}
+.sg-holo-panel .sg-holo-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(0,255,200,0.3), transparent);
+  margin: 8px 0;
+}
+.sg-holo-panel .sg-holo-tag {
+  display: inline-block;
+  padding: 2px 8px;
+  border: 1px solid rgba(0,255,200,0.3);
+  border-radius: 4px;
+  font-size: 0.6rem;
+  color: #00ffc8;
+  margin: 2px 4px 2px 0;
+}
+/* Pulsing corner decorations */
+.sg-holo-panel .sg-holo-corner {
+  position: absolute;
+  width: 10px; height: 10px;
+  border-color: #00ffc8;
+  border-style: solid;
+}
+.sg-holo-corner.tl { top: 4px; left: 4px; border-width: 2px 0 0 2px; }
+.sg-holo-corner.tr { top: 4px; right: 4px; border-width: 2px 2px 0 0; }
+.sg-holo-corner.bl { bottom: 4px; left: 4px; border-width: 0 0 2px 2px; }
+.sg-holo-corner.br { bottom: 4px; right: 4px; border-width: 0 2px 2px 0; }
+
+/* Status bar animation */
+.sg-holo-bar {
+  height: 4px;
+  background: rgba(0,255,200,0.15);
+  border-radius: 2px;
+  margin-top: 6px;
+  overflow: hidden;
+}
+.sg-holo-bar-fill {
+  height: 100%;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #00ffc8, #00aaff);
+  animation: sg-bar-fill 2s ease-out forwards;
+}
+@keyframes sg-bar-fill {
+  from { width: 0%; }
+  to { width: var(--bar-w, 80%); }
+}
+
+@keyframes sg-holo-fade {
+  to { opacity: 1; }
+}
+
+/* === ETHEREAL DIMENSION (White Hole) === */
+.sg-root.sg-ethereal {
+  filter: invert(1) hue-rotate(180deg) brightness(1.2) !important;
+}
+
+/* === ASTEROIDS MINI-GAME === */
+.sg-asteroids-container {
+  position: absolute; inset: 0;
+  z-index: 20; pointer-events: none;
+  overflow: hidden;
+}
+.sg-asteroid {
+  position: absolute;
+  width: 40px; height: 40px;
+  background: radial-gradient(circle, #ff5500, #550000);
+  border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+  box-shadow: 0 0 20px #ff5500;
+  pointer-events: auto;
+  cursor: crosshair;
+  animation: sg-asteroid-fly linear forwards;
+}
+.sg-asteroid::after {
+  content: "";
+  position: absolute;
+  top: 50%; right: 100%;
+  width: 100px; height: 20px;
+  transform: translateY(-50%);
+  background: linear-gradient(to left, rgba(255,85,0,0.8), transparent);
+  filter: blur(4px);
+}
+@keyframes sg-asteroid-fly {
+  0% { transform: translate(120vw, calc(var(--ty) - 200px)) rotate(0deg); }
+  100% { transform: translate(-20vw, calc(var(--ty) + 200px)) rotate(720deg); }
+}
+.sg-asteroid-explosion {
+  position: absolute;
+  width: 10px; height: 10px;
+  background: #ffaa00;
+  border-radius: 50%;
+  box-shadow: 0 0 20px #ffaa00, 0 0 40px #ff5500;
+  pointer-events: none;
+  animation: sg-explode 0.6s ease-out forwards;
+}
+@keyframes sg-explode {
+  0% { transform: scale(1); opacity: 1; }
+  100% { transform: scale(10); opacity: 0; }
+}
+.sg-buff-toast {
+  position: absolute;
+  left: 50%; top: 30%;
+  transform: translate(-50%, -50%);
+  color: #ffaa00;
+  font-family: "Orbitron", sans-serif;
+  font-size: 2rem; font-weight: bold;
+  text-shadow: 0 0 20px #ffaa00;
+  pointer-events: none;
+  animation: sg-toast-up 2s ease-out forwards;
+  z-index: 50;
+}
+@keyframes sg-toast-up {
+  0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0; }
+  20% { transform: translate(-50%, -80%) scale(1.2); opacity: 1; }
+  80% { transform: translate(-50%, -100%) scale(1); opacity: 1; }
+  100% { transform: translate(-50%, -120%) scale(1); opacity: 0; }
 }
