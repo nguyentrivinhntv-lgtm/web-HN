@@ -584,9 +584,9 @@ function App() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 3 }}
               onClick={() => {
-                setIsSuccess(false);
-                setHoverCount(0);
-                setInputText("");
+                setStep('intro');
+                setClickCount(0);
+                setButtonPos({ x: 0, y: 0 });
               }}
               className="mt-12 px-8 py-3 rounded-full bg-white/10 hover:bg-white/20 backdrop-blur-lg border border-white/30 text-white font-semibold transition-all shadow-lg hover:shadow-[0_0_15px_rgba(255,255,255,0.3)]"
             >
